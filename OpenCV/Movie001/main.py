@@ -9,10 +9,40 @@
 """
 
 import cv2
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
+# Movie
+cap = cv2.VideoCapture("./movies/apple.mp4")# Movie
+W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
+H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
+C = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))# Count
+F = int(cap.get(cv2.CAP_PROP_FPS))# Fps
+print("Video W:%d H:%d COUNT:%d FPS:%d" % (W, H, C, F))
+
+def captureFrame(dir, name, ext=".png", off=40):
+	if not cap.isOpened(): return
+	os.makedirs(dir, exist_ok=True)# Directory
+	path = os.path.join(dir, name)
+	digit = len(str(int(C)))
+	print("saveFrame %s %s" % (path, digit))
+
+	for f in range(C):
+		ret, frame = cap.read()
+		if ret:
+			if f%off==0:
+				writeFrame("{}_{}.{}".format(path, str(f).zfill(digit), ext), frame)
+		else: 
+			return
+
+def writeFrame(path, frame):
+	cv2.imwrite(path, frame)
+
+captureFrame("out", "apple.mp4")# Test
+
+"""
 img_orig   = cv2.imread("./images/apple_2.png")# 画像の読み込み
 bgr_lower  = np.array([0, 0, 100])# 抽出する色の下限(BGR)
 bgr_upper  = np.array([100, 100, 255])# 抽出する色の上限(BGR)
@@ -38,6 +68,7 @@ for cnt in contours:
 		cv2.putText(img_gray, "circle", center, f_style, f_scale, f_color)
 
 cv2.imwrite("./images/result.png", img_gray)# 画像の出力
+"""
 
 """
 img_orig = cv2.imread("./images/sample_4.png") # 画像の読み出し
