@@ -15,32 +15,57 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 # Movie
-cap = cv2.VideoCapture("./movies/apple.mp4")# Movie
-W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
-H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
-C = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))# Count
-F = int(cap.get(cv2.CAP_PROP_FPS))# Fps
-print("Video W:%d H:%d COUNT:%d FPS:%d" % (W, H, C, F))
+cap   = cv2.VideoCapture("../movies/sample01.mp4")# Movie
+W     = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
+H     = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
+COUNT = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))# Count
+FPS   = int(cap.get(cv2.CAP_PROP_FPS))# Fps
+print("Video W:%d H:%d COUNT:%d FPS:%d" % (W, H, COUNT, FPS))
 
-def captureFrame(dir, name, ext=".png", off=40):
+def captureFrame(dir, name, ext=".png", off=16):
+
 	if not cap.isOpened(): return
 	os.makedirs(dir, exist_ok=True)# Directory
 	path = os.path.join(dir, name)
-	digit = len(str(int(C)))
-	print("saveFrame %s %s" % (path, digit))
+	digit = len(str(int(COUNT)))
+	print("saveFrame %s" % path)
 
-	for f in range(C):
-		ret, frame = cap.read()
-		if ret:
-			if f%off==0:
-				writeFrame("{}_{}.{}".format(path, str(f).zfill(digit), ext), frame)
-		else: 
-			return
+	for f in range(COUNT):
+		ret, frame = cap.read()# Read
+		if ret==False: return
+		if f%off!=0: continue
+		writeFrame("{}_{}.{}".format(path, str(f).zfill(digit), ext), frame)
 
 def writeFrame(path, frame):
-	cv2.imwrite(path, frame)
 
-captureFrame("out", "apple.mp4")# Test
+	bgr_lower  = np.array([0, 0, 180])# 抽出する色の下限(BGR)
+	bgr_upper  = np.array([50, 50, 255])# 抽出する色の上限(BGR)
+	img_mask   = cv2.inRange(frame, bgr_lower, bgr_upper)# BGRからマスクを作成
+	img_target = cv2.bitwise_and(frame, frame, mask=img_mask)
+	img_gray   = cv2.cvtColor(img_target, cv2.COLOR_BGR2GRAY)# グレイカラー
+
+	_, threshold = cv2.threshold(img_gray, 20, 255, cv2.THRESH_BINARY)# 閾値を設定
+	contours, _  = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)# 輪郭を抽出
+
+	l_color = (255, 255, 255)
+	l_width = 1
+	f_style = cv2.FONT_HERSHEY_DUPLEX
+	f_scale = 1
+	f_color = (255, 255, 255)
+
+	for cnt in contours:
+		(x, y), radius = cv2.minEnclosingCircle(cnt)
+		center = (int(x),int(y))
+		if radius > 20:
+			approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt, True), True)
+			cv2.drawContours(img_gray, [approx], 0, l_color, l_width)
+			cv2.putText(img_gray, "circle", center, f_style, f_scale, f_color)
+
+	cv2.imwrite(path, img_gray)
+
+
+captureFrame("out", "sample")# Test
+cap.release()# Release
 
 """
 img_orig   = cv2.imread("./images/apple_2.png")# 画像の読み込み
