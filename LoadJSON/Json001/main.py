@@ -1,13 +1,5 @@
 # coding: utf-8
 
-"""
-1, numpy, opencvインストール
-	pip install numpy
-	pip install opencv-python
-	pip install pillow
-	pip install matplotlib
-"""
-
 import os
 import cv2
 import json
@@ -16,22 +8,45 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-# Json
-json_str = """{
-	"data":[]
-}
+JSON_PATH = "./out/result.json"
+
+with open(JSON_PATH) as j:
+	jsonObj = json.load(j)
+
+data = jsonObj["data"]
+for n in range(len(data)):
+	frame = data[n]["frame"]
+	x = int(data[n]["x"])
+	y = int(data[n]["y"])
+	print("%s, %d, %d" % (frame, x, y))
+
+
+
 """
-json_obj = json.loads(json_str)
+MOVIE = "../assets/movies/sample01.mp4"
 
 # Movie
-cap   = cv2.VideoCapture("../assets/movies/sample01.mp4")# Movie
-W     = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
-H     = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
-COUNT = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))# Count
-FPS   = int(cap.get(cv2.CAP_PROP_FPS))# Fps
+cap_from = cv2.VideoCapture(MOVIE)# Movie
+W     = int(cap_from.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
+H     = int(cap_from.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
+COUNT = int(cap_from.get(cv2.CAP_PROP_FRAME_COUNT))# Count
+FPS   = int(cap_from.get(cv2.CAP_PROP_FPS))# Fps
 print("Video W:%d H:%d COUNT:%d FPS:%d" % (W, H, COUNT, FPS))
 
-def captureFrame(dir, name, ext=".png", off=90):
+fourcc = cv2.VideoWriter_fourcc("m", "p", "4", "v")
+cap_to = cv2.VideoWriter("result.mp4", fourcc, FPS, (W, H))
+
+for n in range(COUNT):
+	ret, frame = cap_from.read()# Read
+	if ret==False: break
+	cap_to.write(frame)
+
+cap_from.release()
+cap_to.release()
+"""
+
+"""
+def captureFrame(dir, name, ext=".png", off=16):
 
 	if not cap.isOpened(): return
 	os.makedirs(dir, exist_ok=True)# Directory
@@ -91,3 +106,4 @@ dir = "out_{}{}{}_{}{}{}".format(s_year, s_month, s_day, s_hour, s_min, s_sec)
 captureFrame(dir, "grayscale")# Test
 dumpJson(dir, "result")# Dump
 cap.release()# Release
+"""
