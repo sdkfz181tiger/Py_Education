@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-MOVIE = "../assets/movies/sample01.mp4"
+PATH_MOVIE  = "../assets/movies/sample01.mp4"
+RESULT_JSON = "sample01"
 
 # Json
 json_str = """{
@@ -18,14 +19,14 @@ json_str = """{
 json_obj = json.loads(json_str)
 
 # Movie
-cap   = cv2.VideoCapture(MOVIE)# Movie
+cap   = cv2.VideoCapture(PATH_MOVIE)# Movie
 W     = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
 H     = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
 COUNT = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))# Count
 FPS   = int(cap.get(cv2.CAP_PROP_FPS))# Fps
 print("Video W:%d H:%d COUNT:%d FPS:%d" % (W, H, COUNT, FPS))
 
-def captureFrame(dir, name, ext=".png", off=30):
+def captureFrame(dir, name, ext=".png", off=1):
 
 	if not cap.isOpened(): return
 	os.makedirs(dir, exist_ok=True)# Directory
@@ -35,7 +36,7 @@ def captureFrame(dir, name, ext=".png", off=30):
 
 	for n in range(COUNT):
 		ret, frame = cap.read()# Read
-		if ret==False: return
+		if not ret: return
 		if n%off!=0: continue
 		writeFrame(n, "{}_{}.{}".format(path, str(n).zfill(digit), ext), frame)
 
@@ -56,6 +57,7 @@ def writeFrame(n, path, frame):
 	f_scale = 1
 	f_color = (255, 255, 255)
 
+	found = False
 	for cnt in contours:
 		(x, y), radius = cv2.minEnclosingCircle(cnt)
 		center = (int(x), int(y))
@@ -63,8 +65,10 @@ def writeFrame(n, path, frame):
 			approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt, True), True)
 			cv2.drawContours(img_gray, [approx], 0, l_color, l_width)
 			cv2.putText(img_gray, "circle", center, f_style, f_scale, f_color)
-			json_obj["data"].append({"frame": n, "x": int(x), "y": int(y)})# Append
-
+			json_obj["data"].append({"frame": n, "x": int(x), "y": int(y)})# Found
+			found = True
+			break
+	if not found: json_obj["data"].append({"frame": n, "x": 0, "y": 0})# Not found
 	cv2.imwrite(path, img_gray)# Image
 
 def dumpJson(dir, name, ext=".json"):
@@ -82,6 +86,6 @@ s_hour  = str(d_obj.hour).zfill(2)
 s_min   = str(d_obj.minute).zfill(2)
 s_sec   = str(d_obj.second).zfill(2)
 dir = "out_{}{}{}_{}{}{}".format(s_year, s_month, s_day, s_hour, s_min, s_sec)
-captureFrame(dir, "grayscale")# Test
-dumpJson(dir, "result")# Dump
+captureFrame(dir, "grayscale")# Capture
+dumpJson(dir, RESULT_JSON)# Dump
 cap.release()# Release
