@@ -107,20 +107,11 @@ class MovieCapture:
 
 # MovieCapture
 class MovieExporter:
-	mp4_path    = ""
-	json_list   = []
-	mov_cap     = None
-	mov_w       = 0
-	mov_h       = 0
-	mov_count   = 0
-	mov_fps     = 0
 
 	def __init__(self):
 		print("MovieExporter")
 		
-	def export(self, mp4_path, json_list):
-		self.mp4_path  = mp4_path
-		self.json_list = json_list
+	def export(self, mp4_path, json_list, color_list):
 
 		mov_cap   = cv2.VideoCapture(mp4_path)# Movie
 		mov_w     = int(mov_cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
@@ -138,10 +129,10 @@ class MovieExporter:
 
 		# Line, Font
 		l_color = (255, 255, 255)
-		l_width = 1
+		l_width = 4
 		f_style = cv2.FONT_HERSHEY_DUPLEX
 		f_scale = 1
-		f_color = (255, 100, 100)
+		f_color = (255, 255, 255)
 
 		fourcc  = cv2.VideoWriter_fourcc("m", "p", "4", "v")
 		cap_out = cv2.VideoWriter("result.mp4", fourcc, mov_fps, (mov_w, mov_h))
@@ -155,7 +146,7 @@ class MovieExporter:
 					c_frame  = str(json_data[n]["frame"])
 					c_center = (int(json_data[n]["x"]), int(json_data[n]["y"]))
 					cv2.putText(frame, c_frame, c_center, f_style, f_scale, f_color)
-					cv2.circle(frame, c_center, 48, l_color, l_width)
+					cv2.circle(frame, c_center, 48, color_list[o], l_width)
 
 			cap_out.write(frame)# Write
 

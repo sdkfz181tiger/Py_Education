@@ -14,5 +14,10 @@ json_list = [
 	"./out/user_02/result.json",
 	"./out/user_03/result.json"
 ]
+color_list = [
+	(255, 100, 100),
+	(100, 255, 100),
+	(100, 100, 255)
+	]
 m_exporter = MovieExporter()
-m_exporter.export("../movies/sample_original.mp4", json_list)
+m_exporter.export("../movies/sample_original.mp4", json_list, color_list)
