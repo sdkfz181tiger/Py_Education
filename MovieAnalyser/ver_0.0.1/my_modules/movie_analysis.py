@@ -4,6 +4,7 @@ import os
 import cv2
 import json
 import datetime
+import ffmpeg
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -105,15 +106,15 @@ class MovieCapture:
 		s_sec   = str(d_obj.second).zfill(2)
 		return "out_{}{}{}_{}{}{}".format(s_year, s_month, s_day, s_hour, s_min, s_sec)
 
-# MovieCapture
+# MovieExporter
 class MovieExporter:
 
 	def __init__(self):
 		print("MovieExporter")
 		
-	def export(self, mp4_path, json_list, color_list):
+	def exportMovie(self, mp4_from, mp4_to, json_list, color_list):
 
-		mov_cap   = cv2.VideoCapture(mp4_path)# Movie
+		mov_cap   = cv2.VideoCapture(mp4_from)# Movie
 		mov_w     = int(mov_cap.get(cv2.CAP_PROP_FRAME_WIDTH))# Width
 		mov_h     = int(mov_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))# Height
 		mov_count = int(mov_cap.get(cv2.CAP_PROP_FRAME_COUNT))# Count
@@ -135,7 +136,7 @@ class MovieExporter:
 		f_color = (255, 255, 255)
 
 		fourcc  = cv2.VideoWriter_fourcc("m", "p", "4", "v")
-		cap_out = cv2.VideoWriter("result.mp4", fourcc, mov_fps, (mov_w, mov_h))
+		cap_out = cv2.VideoWriter(mp4_to, fourcc, mov_fps, (mov_w, mov_h))
 
 		for n in range(mov_count):
 			ret, frame = mov_cap.read()# Read
@@ -152,5 +153,13 @@ class MovieExporter:
 
 		mov_cap.release()# Release
 		cap_out.release()
+
+	def exportSound(self, mp4_from_a, mp4_from_b, mp4_to):
+
+		input_a = ffmpeg.input(mp4_from_a)
+		input_b = ffmpeg.input(mp4_from_b)
+		stream = ffmpeg.output(input_a.audio, input_b, mp4_to, vcodec="copy", acodec="aac")
+		ffmpeg.run(stream)
+
 
 
