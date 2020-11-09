@@ -1,10 +1,10 @@
 # coding: utf-8
 
-import os
 import cv2
-import json
 import datetime
 import ffmpeg
+import json
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
