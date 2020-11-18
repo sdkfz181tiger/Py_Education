@@ -141,11 +141,25 @@ class MovieExporter:
 		for n in range(mov_count):
 			ret, frame = mov_cap.read()# Read
 			if not ret: break
+
+			# Grid
+			gPad = 60
+			gRows = int(mov_h/gPad) + 1
+			gCols = int(mov_w/gPad) + 1
+			for r in range(gRows):
+				cv2.line(frame, (0, r*gPad), (mov_w, r*gPad), (99, 99, 99, 50))
+			for c in range(gCols):
+				cv2.line(frame, (c*gPad, 0), (c*gPad, mov_h), (99, 99, 99, 50))
+
+			# Circle
 			for o in range(len(json_objs)):
 				json_data = json_objs[o]["data"]
 				if n < len(json_data):
 					c_frame  = str(json_data[n]["frame"])
-					c_center = (int(json_data[n]["x"]), int(json_data[n]["y"]))
+					c_x      = int(json_data[n]["x"])
+					c_y      = int(json_data[n]["y"])
+					c_center = (c_x, c_y)
+					if c_x == 0 and c_y == 0: continue
 					cv2.putText(frame, c_frame, c_center, f_style, f_scale, f_color)
 					cv2.circle(frame, c_center, 48, color_list[o], l_width)
 
