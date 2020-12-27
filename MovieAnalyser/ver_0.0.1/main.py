@@ -25,10 +25,10 @@ json_list = [
 color_list = [
 	(255, 100, 100),
 	(100, 255, 100),
-	(100, 255, 255),
+	(100, 100, 255),
 	(255, 255, 255)
 	]
-mp4_input  = "../movies/" + PREFIX + "/01.mp4"# 合成元のファイル(画面キャプチャしたものを使う事)
+mp4_input  = "../original/" + PREFIX + "/original_ver1.mp4"# 合成元のファイル(画面キャプチャしたものを使う事)
 mp4_frames = "./result_" + PREFIX + "_frames.mp4"# フレームのみのファイル
 mp4_output = "./result_" + PREFIX + "_output.mp4"# 音声合成後のファイル
 
