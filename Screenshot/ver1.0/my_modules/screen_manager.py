@@ -3,8 +3,11 @@
 import datetime
 import os
 import sys
+import sqlite3
 import time
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import ElementNotInteractableException
 
 CHROME_BIN = "/usr/bin/chromium-browser"
 CHROME_DRIVER = "/usr/bin/chromedriver"
@@ -15,36 +18,61 @@ class MainManager:
 	def __init__(self):
 		print("MainManager")
 
-	def browse(self, url, prefix, match):
+	def browse(self, db_name, url, prefix, match):
 		print("Browse URL:%s" % (url))
 
 		# Make directory
 		dir_path = os.path.join("images", prefix, self.get_dir_name())
-		file_path = os.path.join(dir_path, self.get_file_name())
 		os.makedirs(dir_path, exist_ok=True)
 		
 		# Launch browser
-		#driver = webdriver.Chrome(options=self.get_options())# For Mac
+		# driver = webdriver.Chrome(options=self.get_options())# For Mac
 		driver = webdriver.Chrome(CHROME_DRIVER, options=self.get_options())# For Raspberry Pi
 		driver.set_window_size(1400, 2000)
 		driver.get(url)# Get
 		time.sleep(5)# Sleep
 
+		# Read more(For Note)
+		try:
+			driver.find_element_by_class_name("o-timelineHome__more").find_element_by_tag_name("button").click()
+			time.sleep(2)
+			for n in range(10):
+				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+				time.sleep(1)
+		except Exception as e:
+			print(e)
+		time.sleep(1)# Sleep
+
 		# Searching...
 		alinks = driver.find_elements_by_tag_name("a")
-		uniques = []# Uniques
 		for alink in alinks:
-			url = self.remove_query_str(str(alink.get_attribute("href")))
-			file_path = os.path.join(dir_path, "{}.png".format(alink.text))
-			if(len(str(alink.text)) <= 0): continue
-			if(match not in str(url)): continue
-			if(url in uniques): continue
-			uniques.append(url)
+			url = str(alink.get_attribute("href"))# TODO: Remove query parameters...
+			file_path = os.path.join(dir_path, "{}_{}.png".format(self.get_file_name(), alink.text))
+			if(len(str(alink.text)) <= 0): continue# Length
+			if(match not in str(url)): continue# Match
+			if(0 < self.check(db_name, url)): continue# DB
 			self.save(url, file_path)# Save
 
 		time.sleep(1)# Sleep
 		driver.close()# Close
 		driver.quit()# Quit
+
+	def check(self, db_name, url):
+		print("Check DB:%s URL:%s" % (db_name, url))
+
+		# Sqlite3
+		db_connect = sqlite3.connect(db_name)
+		db_cursor = db_connect.cursor()
+		db_cursor.execute("CREATE TABLE IF NOT EXISTS tbl_screenshot(id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT)")
+		db_select = db_cursor.execute("SELECT * FROM tbl_screenshot WHERE url='{}'".format(url))
+		# Count
+		cnt = len(db_select.fetchall())
+		if(cnt <= 0):
+			db_cursor.execute("INSERT INTO tbl_screenshot(url) VALUES('{}')".format(url))
+			db_connect.commit()
+		db_cursor.close()
+		db_connect.close()
+		return cnt
 
 	def save(self, url, file_path):
 		print("Save URL:%s PATH:%s" % (url, file_path))
@@ -55,6 +83,13 @@ class MainManager:
 		driver.get(url)# Get
 		time.sleep(5)# Sleep
 
+		# Read more(Hatena)
+		try:
+			driver.find_element_by_class_name("read-more-comments").find_element_by_tag_name("a").click()
+		except Exception as e:
+			print(e)
+		time.sleep(1)# Sleep
+
 		w = driver.execute_script("return document.body.scrollWidth;")
 		h = driver.execute_script("return document.body.scrollHeight;")
 		driver.set_window_size(w, h)
@@ -63,9 +98,6 @@ class MainManager:
 		time.sleep(1)# Sleep
 		driver.close()# Close
 		driver.quit()# Quit
-
-	def remove_query_str(self, url):
-		return url[:url.find("?")]
 
 	def get_dir_name(self):
 		# Directory name
@@ -81,7 +113,7 @@ class MainManager:
 		s_hour  = str(d_obj.hour).zfill(2)
 		s_min   = str(d_obj.minute).zfill(2)
 		s_sec   = str(d_obj.second).zfill(2)
-		return "{}{}{}.png".format(s_hour, s_min, s_sec)
+		return "{}{}{}".format(s_hour, s_min, s_sec)
 
 	def get_options(self):
 		# Options
