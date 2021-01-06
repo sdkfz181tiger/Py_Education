@@ -85,10 +85,12 @@ class MovieCapture:
 				approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt, True), True)
 				cv2.drawContours(img_gray, [approx], 0, l_color, l_width)
 				cv2.putText(img_gray, "circle", center, f_style, f_scale, f_color)
-				self.json_obj["data"].append({"frame": n, "x": int(x), "y": int(y)})# Found
+				h = float(x) / float(self.mov_w) # Horizontal
+				v = float(y) / float(self.mov_h) # Vertical
+				self.json_obj["data"].append({"frame": n, "x": int(x), "y": int(y), "h": h, "v": v})# Found
 				found = True
 				break
-		if not found: self.json_obj["data"].append({"frame": n, "x": 0, "y": 0})# Not found
+		if not found: self.json_obj["data"].append({"frame": n, "x": 0, "y": 0, "h": 0, "v": 0})# Not found
 		#cv2.imwrite(path, img_gray)# Image
 
 	def dumpJson(self, path):
@@ -156,10 +158,12 @@ class MovieExporter:
 				json_data = json_objs[o]["data"]
 				if n < len(json_data):
 					c_frame  = str(json_data[n]["frame"])
-					c_x      = int(json_data[n]["x"])
-					c_y      = int(json_data[n]["y"])
-					c_center = (c_x, c_y)
-					if c_x == 0 and c_y == 0: continue
+					# c_x      = int(json_data[n]["x"])
+					# c_y      = int(json_data[n]["y"])
+					c_h      = int(float(json_data[n]["h"]) * float(mov_w))
+					c_v      = int(float(json_data[n]["v"]) * float(mov_h))
+					c_center = (c_h, c_v)
+					if c_h == 0 and c_v == 0: continue
 					cv2.putText(frame, c_frame, c_center, f_style, f_scale, f_color)
 					cv2.circle(frame, c_center, 48, color_list[o], l_width)
 

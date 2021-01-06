@@ -4,6 +4,7 @@ from my_modules.movie_analysis import MovieCapture, MovieExporter
 
 # MovieCapture
 # 映像から円を判定し、JSONファイルに座標を書き出す
+# 注意!!:合成元のオリジナル映像もOBSで画面撮影したものを使うこと(FPSズレ対応)
 PREFIX = "teamA"
 
 m_capture = MovieCapture()
@@ -28,9 +29,9 @@ color_list = [
 	(100, 100, 255),
 	(255, 255, 255)
 	]
-mp4_input  = "../original/" + PREFIX + "/original_ver1.mp4"# 合成元のファイル(画面キャプチャしたものを使う事)
-mp4_frames = "./result_" + PREFIX + "_frames.mp4"# フレームのみのファイル
-mp4_output = "./result_" + PREFIX + "_output.mp4"# 音声合成後のファイル
+mp4_input  = "../original/" + PREFIX + "/original_ver2.mp4"# 合成元のファイル(画面キャプチャしたものを使う事)
+mp4_frames = "../result/" + PREFIX + "_frames.mp4"# フレームのみのファイル
+mp4_output = "../result/" + PREFIX + "_output.mp4"# 音声合成後のファイル
 
 m_exporter = MovieExporter()
 m_exporter.exportMovie(mp4_input, mp4_frames, json_list, color_list)
