@@ -4,14 +4,15 @@ from my_modules.movie_analysis import MovieCapture, MovieExporter
 
 # MovieCapture
 # 映像から円を判定し、JSONファイルに座標を書き出す
-# 注意!!:合成元のオリジナル映像もOBSで画面撮影したものを使うこと(FPSズレ対応)
-PREFIX = "teamA"
+# 注意!!:合成元のオリジナル映像もOBS画面キャプチャしたものを使う事(FPSズレ対応)
+# 編集ソフトを使い、"1970x720 30FPS"に出力したものでも可能
+PREFIX = "teamD"
 
 m_capture = MovieCapture()
 m_capture.capture("../movies/" + PREFIX + "/01.mp4", "user_01", 1)
-m_capture.capture("../movies/" + PREFIX + "/02.mp4", "user_02", 1)
-m_capture.capture("../movies/" + PREFIX + "/03.mp4", "user_03", 1)
-m_capture.capture("../movies/" + PREFIX + "/04.mp4", "user_04", 1)
+# m_capture.capture("../movies/" + PREFIX + "/02.mp4", "user_02", 1)
+# m_capture.capture("../movies/" + PREFIX + "/03.mp4", "user_03", 1)
+# m_capture.capture("../movies/" + PREFIX + "/04.mp4", "user_04", 1)
 
 time.sleep(5)# Sleep
 
@@ -29,7 +30,7 @@ color_list = [
 	(100, 100, 255),
 	(255, 255, 255)
 	]
-mp4_input  = "../original/" + PREFIX + "/original_ver2.mp4"# 合成元のファイル(画面キャプチャしたものを使う事)
+mp4_input  = "../original/" + PREFIX + "/original_ver2.mp4"# 合成元のファイル(OBS画面キャプチャしたものを使う事)
 mp4_frames = "../result/" + PREFIX + "_frames.mp4"# フレームのみのファイル
 mp4_output = "../result/" + PREFIX + "_output.mp4"# 音声合成後のファイル
 
