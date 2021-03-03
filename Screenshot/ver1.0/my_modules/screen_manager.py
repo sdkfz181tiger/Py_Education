@@ -26,12 +26,12 @@ class MainManager:
 		os.makedirs(dir_path, exist_ok=True)
 		
 		# Launch browser
-		# driver = webdriver.Chrome(options=self.get_options())# For Mac
-		driver = webdriver.Chrome(CHROME_DRIVER, options=self.get_options())# For Raspberry Pi
+		driver = webdriver.Chrome(options=self.get_options())# For Mac
+		# driver = webdriver.Chrome(CHROME_DRIVER, options=self.get_options())# For Raspberry Pi
 		driver.set_window_size(1400, 2000)
 		driver.get(url)# Get
 		time.sleep(5)# Sleep
-
+		"""
 		# Read more(For Note)
 		try:
 			driver.find_element_by_class_name("o-timelineHome__more").find_element_by_tag_name("button").click()
@@ -42,7 +42,7 @@ class MainManager:
 		except Exception as e:
 			print(e)
 		time.sleep(1)# Sleep
-
+		"""
 		# Searching...
 		alinks = driver.find_elements_by_tag_name("a")
 		for alink in alinks:
@@ -59,7 +59,7 @@ class MainManager:
 
 	def check(self, db_name, url):
 		print("Check DB:%s URL:%s" % (db_name, url))
-
+		
 		# Sqlite3
 		db_connect = sqlite3.connect(db_name)
 		db_cursor = db_connect.cursor()
@@ -82,14 +82,14 @@ class MainManager:
 		driver.set_window_size(1400, 2000)
 		driver.get(url)# Get
 		time.sleep(5)# Sleep
-
+		
 		# Read more(Hatena)
 		try:
 			driver.find_element_by_class_name("read-more-comments").find_element_by_tag_name("a").click()
 		except Exception as e:
 			print(e)
 		time.sleep(1)# Sleep
-
+		
 		w = driver.execute_script("return document.body.scrollWidth;")
 		h = driver.execute_script("return document.body.scrollHeight;")
 		driver.set_window_size(w, h)
@@ -131,7 +131,7 @@ class MainManager:
 		options.add_argument('--ignore-ssl-errors')
 		prefs = {"profile.default_content_setting_values.notifications" : 2}
 		options.add_experimental_option("prefs", prefs)
-		options.binary_location = CHROME_BIN # For Raspberry Pi
+		# options.binary_location = CHROME_BIN # For Raspberry Pi
 		return options
 
 # HatenaManager
